@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Icon, Panel, PixelButton, RobotSprite, StatBar } from "@/components/pixel";
-import { TournamentMap } from "@/components/tourmap";
+import { WorldMap } from "@/components/world-map";
 import { fightReward, grantXP, robotMaxXP, type RobotSave } from "@/game/engine";
 import {
   addGold,
@@ -17,6 +17,7 @@ import {
 } from "@/game/save";
 import { faceUrl, ROBOT_MAP } from "@/game/robots";
 import { type TournamentDef } from "@/game/tournaments";
+import { loadWorldSave, saveWorld } from "@/game/world";
 import { BattleScreen } from "@/screens/battle";
 import { TopBar } from "@/screens/roster";
 
@@ -128,7 +129,11 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
     if (firstTime && tour.reward.item) {
       addItem(tour.reward.item, tour.reward.itemQty ?? 1);
     }
-    markTournamentWon(tour.id);
+    if (tour.id.startsWith("quick:")) {
+      const save = loadWorldSave();
+      save.quickWins += 1;
+      saveWorld(save);
+    } else markTournamentWon(tour.id);
     setReport({
       tournament: tour,
       won: true,
@@ -182,7 +187,7 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
               color: report.won ? "var(--mk-accent2)" : "var(--mk-hp)",
             }}
           >
-            {report.won ? "CAMPEAO!" : "ELIMINADO"}
+            {report.won ? report.tournament.id.startsWith("quick:") ? "DUELO VENCIDO!" : "CAMPEAO!" : "ELIMINADO"}
           </div>
           <div
             className="mk-title"
@@ -292,7 +297,7 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <TournamentMap
+    <WorldMap
       playerLevel={g.playerLevel}
       won={g.wonTournaments}
       teamEmpty={team.length === 0}

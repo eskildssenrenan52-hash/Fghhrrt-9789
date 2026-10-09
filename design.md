@@ -50,3 +50,10 @@ crítico, XP, treino e torneios extraídas do SWF original), com 20 robôs origi
 
 Menu → Torneio → seleção de equipe (4) → batalha em série (n lutas) → recompensa → volta ao mapa.
 Progresso salvo em `localStorage` (offline total, nenhuma chamada de rede necessária).
+
+## Coliseu expandido / controles G5
+- Mesmo pixel art, atlas IA existentes; 205 regiões derivadas com nome do torneio, mistura temática e paleta própria. Não gerar novos robôs.
+- Joystick octogonal de 104px à esquerda; botões táteis de 48–64px à direita em arco (ataque âmbar, especial ciano, salto claro). Multitoque com pointer capture, estado pressionado e indicador de recarga.
+- HUD compacto: região, altitude/profundidade, vida, carga especial e objetivo ativo. Painéis de atlas para mapa/diário; reduzir controles em telas baixas sem reduzir alvos abaixo de 44px.
+- Rotas legíveis: trilha de montanha, escadas aéreas com patamares a cada três tiles, galerias e poços alternados; sinais de rota e paradas de reparo.
+- Diário com tarefas e desafios jogáveis, marcadores de atividades; missões e resultados sem substituir exploração por telas vazias.

@@ -188,4 +188,25 @@
 - [x] `assets/e2e_battle_g3.py` OK — 100 animações sem id duplicado, 157 elementos resolvidos em 20 bursts, 5 faixas de impacto distintas, 28 VFX todos 200/384×96, 11 sheets todos 200/480×1088, 60 turnos simulados gerando **893 eventos de animação / 31 ids distintos e nenhum fora do catálogo**; 0 erro de console, 0 pageerror, 0 imagem quebrada, 0 HTTP>=400
 - [x] `assets/e2e_battle.py` OK (regressão: partida real sem erros nem sprites quebrados)
 
-### Próxima fase: G4 — torneios como mundo explorável
+### G4 — Mundo dos Torneios: base explorável entregue
+- [x] `WorldMap` substitui o mapa antigo na tela de torneios; fluxo prédio → preparação → batalha → relatório preservado.
+- [x] 2860×640 tiles de 32px (91.520×20.480 px), área 100× a do mapa antigo; 12 biomas, 3 estratos subterrâneos, cavernas, poços e ilhas com plataformas.
+- [x] 205 torneios físicos (superfície, câmaras e ilhas); soleiras protegidas das escavações vizinhas.
+- [x] 62 assets processados: 14 atlases de chão, 14 de decoração, 28 fundos em camadas, 4 atlases de prédios, criaturas e itens; gerados por IA. Os 256 robôs permanecem intactos.
+- [x] Andar, correr, salto duplo, golpe, pisão, dano, retorno à lanterna; 735 criaturas, 6667 decorações, 5344 itens e 95 lanternas.
+- [x] Minimap com neblina de exploração e teleporte às lanternas acesas; pausa da física ao abrir; progresso e checkpoint persistentes.
+- [x] Correção visual: paralaxe acompanha o bioma atual, sem atrasar um bioma; inspecionados início, selva, catacumbas, ilha e região nebular.
+- [x] Vite fixado em 4200 no config (o projeto legado não possui `__ports.cjs`); servidor reiniciado para eliminar cache antigo.
+- [x] E2E G4: todos os 205 acessos com chão e porta livres, 62 imagens decodificadas, movimento, salto, minimapa/pausa, entrada no torneio e retorno; zero console/pageerror/HTTP>=400/imagem quebrada.
+- [x] Regressão `e2e_battle.py`: partida real e turno sem erro nem imagem quebrada.
+- [ ] Puzzles e NPCs de exploração (não incluídos nesta base).
+- [ ] G5: joystick analógico, ataque e especial; sem botão de correr.
+
+### Expansão G4/G5 — pedido aprovado (entrega única)
+- Escopo: mais 100× sobre 2860×640; geração de chunks sob demanda, 205 biomas derivados individuais, céu alto e subsolo profundo com rotas alcançáveis.
+- Controles: joystick multitoque proporcional, ataque, especial com cooldown, pulo e interação; sem botão de correr; compartilhar com hub.
+- Atividades: missões de coleta/caça/exploração, desafios de percurso e sobrevivência, batalhas rápidas reais, relíquias e postos de reparo; recompensas persistentes.
+- Economia: reutilizar os 62 assets IA e sprites existentes; só gerar imagens se faltar uma função visual que a composição não resolva.
+- Arquivos: world.ts (chunks/rotas/regiões/save), world-map.tsx (física/render/atividades), exploration-controls.tsx (novo), world-activities.ts (novo), tournaments.tsx (batalhas rápidas), hub-city.tsx (controles), testes de rotas e E2E.
+- Sem novas APIs ou tabelas: progresso offline com migração não destrutiva do save G4; entrega web e mobile após typecheck/build/testes.
+- [ ] Implementação em andamento.

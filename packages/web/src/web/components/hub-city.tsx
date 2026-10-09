@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ExplorationControls } from "@/components/exploration-controls";
 import type { Screen } from "@/screens/menu";
 import { useGate } from "@/components/gate";
 import { HERO_CLIPS, HERO_FRAME, clipFrame, heroFace, heroSheet, type HeroClip } from "@/game/hero";
@@ -174,6 +175,9 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
   // entradas
   const input = useRef({ left: false, right: false, run: false, jumpHeld: false });
   const jumpBuf = useRef(0);
+  const analog = useRef({x:0,y:0});
+  const specialUntil = useRef(0);
+  const [cooldown,setCooldown] = useState(0);
   const actRef = useRef<{ clip: HeroClip; until: number } | null>(null);
   const onEnterRef = useRef(onEnter);
   onEnterRef.current = onEnter;
@@ -228,6 +232,14 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
     transitionRef.current(() => onEnterRef.current(b.id));
   }, []);
 
+  const doSpecial = () => {
+    const now=performance.now();if(now<specialUntil.current)return;
+    specialUntil.current=now+4000;actRef.current={clip:"attack",until:now+600};
+    spawn(player.current.x,player.current.y-40,36,"#35e2f0",true);
+    // Field magnet collects nearby energy cores; real utility, no new sprites.
+    for(const c of cores.current)if(c.taken<=0&&Math.hypot(c.x-player.current.x,c.y-player.current.y)<220){c.taken=15;setScore(v=>v+1);}
+  };
+
   /* --------------------------- teclado --------------------------- */
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -239,6 +251,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
         e.preventDefault();
         doJump();
       } else if (k === "f") actRef.current = { clip: "attack", until: performance.now() + 420 };
+      else if (k === "r" || k === "c") doSpecial();
       else if (k === "enter" || k === "e") enter();
     };
     const up = (e: KeyboardEvent) => {
@@ -319,8 +332,10 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       if (actRef.current && actRef.current.until <= now) actRef.current = null;
 
       /* ---------------- física ---------------- */
-      const dir = (input.current.right ? 1 : 0) - (input.current.left ? 1 : 0);
-      const maxSp = input.current.run ? RUN : WALK;
+      const keyboard=(input.current.right?1:0)-(input.current.left?1:0);
+      const dir=Math.sign(keyboard||analog.current.x);
+      const maxSp=keyboard?(input.current.run?RUN:WALK):Math.abs(analog.current.x)*RUN;
+      if(Math.floor(t*5)!==Math.floor((t-dt)*5))setCooldown(Math.max(0,(specialUntil.current-now)/1000));
       const accel = P.onGround ? ACCEL : AIR_ACCEL;
       if (dir !== 0 && !(acting === "interact")) {
         P.vx += dir * accel * dt;
@@ -828,72 +843,8 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
         </button>
       )}
 
-      {/* Controles touch */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          padding: "10px 12px 16px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          zIndex: 5,
-        }}
-      >
-        <div style={{ display: "flex", gap: 8 }}>
-          <PadBtn label="◀" onDown={() => (input.current.left = true)} onUp={() => (input.current.left = false)} />
-          <PadBtn label="▶" onDown={() => (input.current.right = true)} onUp={() => (input.current.right = false)} />
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <PadBtn label="CORRER" onDown={() => (input.current.run = true)} onUp={() => (input.current.run = false)} />
-          <PadBtn
-            label="PULO"
-            big
-            onDown={doJump}
-            onUp={() => (input.current.jumpHeld = false)}
-          />
-        </div>
-      </div>
+      <ExplorationControls onMove={(x,y)=>{analog.current={x,y};}} onJump={doJump} onJumpEnd={()=>input.current.jumpHeld=false}
+        onAttack={()=>actRef.current={clip:"attack",until:performance.now()+420}} onSpecial={doSpecial} cooldown={cooldown} disabled={picker||busy}/>
     </div>
-  );
-}
-
-function PadBtn({
-  label,
-  onDown,
-  onUp,
-  big,
-}: {
-  label: string;
-  onDown: () => void;
-  onUp: () => void;
-  big?: boolean;
-}) {
-  return (
-    <button
-      className="mk-title"
-      onPointerDown={(e) => {
-        e.preventDefault();
-        onDown();
-      }}
-      onPointerUp={onUp}
-      onPointerLeave={onUp}
-      onPointerCancel={onUp}
-      style={{
-        fontSize: 8,
-        minWidth: big ? 74 : 48,
-        padding: big ? "18px 8px" : "14px 8px",
-        color: big ? "#03121a" : "var(--mk-accent)",
-        background: big ? "rgba(53,226,240,0.9)" : "rgba(4,12,22,0.85)",
-        border: "2px solid rgba(53,226,240,0.6)",
-        touchAction: "none",
-        userSelect: "none",
-        cursor: "pointer",
-      }}
-    >
-      {label}
-    </button>
   );
 }
