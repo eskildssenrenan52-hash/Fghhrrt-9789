@@ -1,4 +1,4 @@
-import type { Screen } from "@/screens/menu";
+import type { Screen } from "./screen-ids";
 
 export interface SystemGuideDef {name:string;tag:string;art:string;mission:string;steps:string[];rules:string[]}
 export const SYSTEM_GUIDES:Record<Screen,SystemGuideDef>={

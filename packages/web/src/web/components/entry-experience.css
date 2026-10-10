@@ -4,7 +4,7 @@
 .mc-studio-mark img{width:100%;height:auto;display:block;image-rendering:pixelated}
 .mc-studio-mark p{font-size:9px;letter-spacing:2px;margin:0 0 10px;color:#a8ccd8}
 .mc-studio-mark small{font-size:7px;letter-spacing:3px;color:#d9a852}
-.mc-entry-skip{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));right:18px;border:0;border-bottom:1px solid #3b505c;background:none;color:#7593a4;padding:12px 2px;font:7px 'Press Start 2P',monospace;cursor:pointer}
+.mc-entry-skip{position:absolute;top:max(18px,env(safe-area-inset-top));right:18px;border:0;border-bottom:1px solid #3b505c;background:none;color:#7593a4;padding:12px 2px;font:7px 'Press Start 2P',monospace;cursor:pointer}
 .mc-loader{background:#030912;transition:opacity 650ms ease}
 .mc-loader[data-done=true]{opacity:0;pointer-events:none}
 .mc-loader-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 650ms ease;image-rendering:pixelated}

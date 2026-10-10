@@ -1,4 +1,4 @@
-import type { Screen } from "@/screens/menu";
+import type { Screen } from "./screen-ids";
 
 export interface TutorialProgress {
   started: boolean;

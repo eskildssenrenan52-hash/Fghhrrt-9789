@@ -1,5 +1,17 @@
 # CAMPEÕES MECHA — progresso
 
+## Merge 2026-10-10 — repo Yek2kue-0408 + mundo G5
+- [x] Repo GitHub mesclado via git (base comum 479b1c9). Backup do estado anterior no branch `backup-g5-pre-merge`. Único conflito: task.md (texto).
+- [x] Tipo `Screen` movido para `game/screen-ids.ts` (typecheck do mobile quebrava via cadeia API→web/game→screens/menu).
+- [x] `launch-assets.ts`: removidos 17 arquivos inexistentes (/map/tiles, /map/props antigos) e incluídos 62 de /world.
+- [x] Botão PULAR ABERTURA movido para o topo (o selo Runable cobria o botão no rodapé).
+- [x] db:push aplicado (tabelas de auth/online). typecheck 3/3 e build OK.
+- [x] `assets/e2e_world_g5.py` PASS: entrada nova → JOGAR → hub → COLISEU → TORNEIOS [T] (54 liberados no nível 20) → briefing → batalha real (3 golpes); teclado, joystick proporcional (−100 e soltura 0), atlas, diário; zero erro de console/HTTP.
+- [ ] Não testado nesta rodada: PvP online/login, tutorial completo, corrida/cerco, lanternas, migração mc_world_g4.
+- Tela de vitória MVP: cancelada pelo usuário — não implementar.
+- APK: gerado pelo usuário via Publicar na prévia mobile (conta Expo). Não buildar no sandbox.
+
+
 ## Novo escopo aprovado — PvP online real e conclusão das pendências
 - Aprovado: fila pública + salas privadas por código; equipe de até quatro robôs; turnos de 60 segundos; reconexão; ações/tempo/resultado validados no servidor, nunca adversários IA disfarçados de players.
 - Competitivo normalizado: todos os 256 robôs disponíveis; nível padronizado; sem equipamentos/pets/cards ou bônus oriundos de saves offline editáveis. Saves offline preservados e separados do competitivo.
