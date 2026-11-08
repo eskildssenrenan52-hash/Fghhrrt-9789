@@ -82,3 +82,10 @@ Progresso salvo em `localStorage` (offline total, nenhuma chamada de rede necess
 - HUD compacto: região, altitude/profundidade, vida, carga especial e objetivo ativo. Painéis de atlas para mapa/diário; reduzir controles em telas baixas sem reduzir alvos abaixo de 44px.
 - Rotas legíveis: trilha de montanha, escadas aéreas com patamares a cada três tiles, galerias e poços alternados; sinais de rota e paradas de reparo.
 - Diário com tarefas e desafios jogáveis, marcadores de atividades; missões e resultados sem substituir exploração por telas vazias.
+
+## Bustos animados do HANGAR (cartão de foco)
+- Assets: `packages/web/public/robots/bust/{id}.webp` (283 ids: 256 do roster + 27 míticos). Tira horizontal de frames quadrados, fundo transparente, alinhada embaixo.
+  - 21 ids com frames 256 px × 12 (fase 1, imagem individual); 129 com 200 px × 12; 133 com 200 px × 9 (o modelo gerou grade 3×3).
+- Componente `components/robot-bust.tsx` (`RobotBust`): nº de frames = naturalWidth / naturalHeight, CSS `steps(n)` em 1 s (12 ou 9 fps), `image-rendering: pixelated`, parado com `prefers-reduced-motion`. Fallback para `RobotSprite` idle em ids `lab_`/`npc_`/`custom_` ou erro de carga.
+- Usado só no palco do `roster.tsx` (184 px). Robô bloqueado mantém a silhueta do rosto. Grade e workbench seguem com `faceUrl`. Não está no `LAUNCH_ASSETS` (carrega sob demanda).
+- Pipeline (scratch, fora do repo): gpt-image-2.5-flare, 6 robôs por imagem 16:9 2k, chroma key, `process6.py`.

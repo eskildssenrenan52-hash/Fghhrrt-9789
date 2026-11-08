@@ -9,6 +9,7 @@ import { baseStats, maxTrained, robotMaxXP, type RobotSave } from "@/game/engine
 import { setTeam, useGame } from "@/game/save";
 import { trainRobotStat } from "@/game/economy-actions";
 import { TeamWorkbench } from "@/components/team-workbench";
+import { RobotBust } from "@/components/robot-bust";
 import { ScreenBoundary } from "@/components/screen-boundary";
 import { isCustom } from "@/game/lab";
 import { faceUrl, ROBOT_MAP, ROBOTS } from "@/game/robots";
@@ -135,7 +136,7 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
               style={{ imageRendering: "pixelated" }}
             />
           ) : (
-            <RobotSprite robotId={focus} clip="idle" size={132} fps={4} />
+            <RobotBust robotId={focus} size={184} />
           )}
         </div>
 

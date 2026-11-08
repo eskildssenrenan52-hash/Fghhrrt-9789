@@ -242,3 +242,7 @@ Pedido do usuário (2026-09-30):
 - Testes: API real 49 ✓, motor competitivo (48 partidas 1v1–4v4, simetria, travas) ✓, regressões 10 ✓, build ✓, HTTP 4200 root/health/auth ✓.
 - Pendente: Google login não verificado; .env veio do scaffold mechach-hkul1er (app = campeoe-xwr5e13); exclusão de conta exigida pela Play Store não implementada.
 - Play Store: publicar site → publicar mobile pelo painel do preview (conta Expo). Nunca buildar no sandbox.
+
+## Bustos animados (2026-11-08) — FEITO
+- 283 tiras em public/robots/bust, RobotBust no palco do hangar, E2E assets/e2e_bust.py PASS.
+- Pendente opcional: 133 robôs com 9 frames (regerar para 12 se o usuário quiser).
