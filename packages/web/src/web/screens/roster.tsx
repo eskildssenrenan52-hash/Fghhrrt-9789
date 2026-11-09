@@ -12,7 +12,7 @@ import { TeamWorkbench } from "@/components/team-workbench";
 import { RobotBust } from "@/components/robot-bust";
 import { ScreenBoundary } from "@/components/screen-boundary";
 import { isCustom } from "@/game/lab";
-import { faceUrl, ROBOT_MAP, ROBOTS } from "@/game/robots";
+import { faceUrl, portraitUrl, ROBOT_MAP, ROBOTS } from "@/game/robots";
 
 const RARITY_GLOW: Record<string, string> = {
   bronze: "rgba(205,127,50,0.9)",
@@ -129,7 +129,7 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
         >
           {locked ? (
             <img
-              src={faceUrl(focus)}
+              src={portraitUrl(focus)}
               alt=""
               width={132}
               height={132}
@@ -324,7 +324,7 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
               >
                 <Frame rarity={def.rarity} size={68}>
                   <img
-                    src={faceUrl(def.id)}
+                    src={portraitUrl(def.id)}
                     alt=""
                     style={{
                       width: "100%",

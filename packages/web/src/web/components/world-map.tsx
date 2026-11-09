@@ -43,7 +43,8 @@ import {
  * paralaxe de 2 camadas por bioma, tiles/props/predios/inimigos gerados por IA.
  * ------------------------------------------------------------------------- */
 
-const SPR = 96;
+// sprite do robo desenhado para que o corpo visivel ocupe ~1 bloco (T=32)
+const SPR = 46;
 const RACE_RISE = 120; // tiles acima do pe da torre
 const RACE_TIME = 75;
 const MAX_HP = 6;
@@ -414,7 +415,7 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
           down: input.current.down || analog.current.y > 0.55,
           jumpHeld: input.current.jumpHeld,
           jumpBuf: jumpBuf.current,
-          lift: liftAt(world, Math.floor(P.x / T), Math.floor((P.y - 28) / T)),
+          lift: liftAt(world, Math.floor(P.x / T), Math.floor((P.y - 16) / T)),
         };
         const res = stepBody(P, ctl, dt, tileAt);
         jumpBuf.current = ctl.jumpBuf;
@@ -435,7 +436,7 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
         P.atk = Math.max(0, P.atk - dt);
         P.special=Math.max(0,P.special-dt); P.specialFx=Math.max(0,P.specialFx-dt);
         if(specialReq.current){specialReq.current=false;
-          if(P.special<=0){P.special=4;P.specialFx=.55;P.inv=Math.max(P.inv,.5);spawn(P.x,P.y-28,44,"#35e2f0",650,0);
+          if(P.special<=0){P.special=4;P.specialFx=.55;P.inv=Math.max(P.inv,.5);spawn(P.x,P.y - 16,44,"#35e2f0",650,0);
             for(const m of mobs)if(m.dead<=0&&Math.hypot(m.x-P.x,m.y-P.y)<185){m.hp-=3;m.hit=.3;m.x+=Math.sign(m.x-P.x)*35;
               if(m.hp<=0){m.dead=60;save.current.kills++;save.current.cores+=m.variant===4?8:3;}}
           }
@@ -445,10 +446,10 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
           if (P.atk <= 0.05) {
             P.atk = 0.27; P.combo=(P.combo+1)%3;
             const ax = P.x + P.face * 42;
-            spawn(ax, P.y - 30, 6, "#ffffff", 260, 0);
+            spawn(ax, P.y - 16, 6, "#ffffff", 260, 0);
             for (const m of mobs) {
               if (m.dead > 0) continue;
-              if (Math.abs(m.x - ax) < 46 && Math.abs(m.y - 24 - (P.y - 28)) < 52) {
+              if (Math.abs(m.x - ax) < 46 && Math.abs(m.y - 24 - (P.y - 16)) < 52) {
                 m.hp -= P.combo===0?2:1;
                 m.hit = 0.18;
                 m.x += P.face * 26;
@@ -496,12 +497,12 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
           // Sentinelas atiram; saltadores atacam por arco; elites resistem mais.
           m.shoot-=dt;
           if(chase&&m.shoot<=0){m.shoot=m.variant===3?1.8:2.6;
-            if(m.variant===3) {const dx=P.x-m.x,dy=P.y-30-(m.y-30),len=Math.max(1,Math.hypot(dx,dy));projectiles.push({x:m.x,y:m.y-30,vx:dx/len*220,vy:dy/len*220,life:3});}
+            if(m.variant===3) {const dx=P.x-m.x,dy=P.y - 16-(m.y-30),len=Math.max(1,Math.hypot(dx,dy));projectiles.push({x:m.x,y:m.y-30,vx:dx/len*220,vy:dy/len*220,life:3});}
             if(m.variant===2&&!m.fly)m.y=m.hy-45;
           }
           if(!m.fly&&m.y<m.hy)m.y=Math.min(m.hy,m.y+160*dt);
           // dano por contato
-          if (P.inv <= 0 && Math.abs(m.x - P.x) < 30 && Math.abs(m.y - 22 - (P.y - 28)) < 40) {
+          if (P.inv <= 0 && Math.abs(m.x - P.x) < 30 && Math.abs(m.y - 22 - (P.y - 16)) < 40) {
             // pisao
             if (P.vy > 150 && P.y < m.y - 24) {
               m.hp = 0;
@@ -515,14 +516,14 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
               P.inv = 1.1;
               P.vx = (P.x > m.x ? 1 : -1) * 420;
               P.vy = -420;
-              spawn(P.x, P.y - 30, 14, "#ff4a4a");
+              spawn(P.x, P.y - 16, 14, "#ff4a4a");
             }
           }
         }
 
         for(let i=projectiles.length-1;i>=0;i--){const q=projectiles[i];q.life-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;
           if(q.life<=0||solidAt(q.x,q.y)){projectiles.splice(i,1);continue;}
-          if(P.inv<=0&&Math.hypot(q.x-P.x,q.y-(P.y-28))<24){P.hp--;P.inv=1;projectiles.splice(i,1);}
+          if(P.inv<=0&&Math.hypot(q.x-P.x,q.y-(P.y - 16))<24){P.hp--;P.inv=1;projectiles.splice(i,1);}
         }
         if(P.hp<=0){P.hp=MAX_HP;P.x=P.spawnX;P.y=P.spawnY;P.vx=P.vy=0;P.inv=1.2;if(challenge.current){challenge.current=null;waves=[];}showToast({text:"SISTEMA REINICIADO",sub:"VOCE VOLTOU A ULTIMA LANTERNA",until:now+2200,color:"#ff6a5a"});}
         const ch=challenge.current;
@@ -539,7 +540,7 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
         }
 
         /* ---------------- coletaveis ---------------- */
-        const near2 = (x: number, y: number, r: number) => Math.abs(x - P.x) < r && Math.abs(y - (P.y - 28)) < r + 10;
+        const near2 = (x: number, y: number, r: number) => Math.abs(x - P.x) < r && Math.abs(y - (P.y - 16)) < r + 10;
         for (const it of world.items) {
           if (Math.abs(it.x - P.x) > 60) continue;
           if (it.kind === "chest") {
@@ -936,7 +937,7 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
         const dh = SPR * def.scale * sq;
         const bob = def.bob ? Math.sin(t * def.fps * 1.6) * def.bob : 0;
         ctx.save();
-        ctx.translate(Math.round(P.x - cx), Math.round(P.y - cy + bob + 6));
+        ctx.translate(Math.round(P.x - cx), Math.round(P.y - cy + bob * 0.5 + 3));
         ctx.scale(P.face, 1);
         if (def.tilt) ctx.rotate(def.tilt);
         ctx.drawImage(sheet, P.frame * HERO_FRAME, 0, HERO_FRAME, HERO_FRAME, -dw / 2, -dh, dw, dh);
@@ -947,7 +948,7 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
         ctx.strokeStyle = `rgba(255,255,255,${P.atk * 2.4})`;
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.arc(P.x - cx + P.face * 18, P.y - cy - 32, 34, P.face > 0 ? -1.2 : Math.PI - 0.6, P.face > 0 ? 0.6 : Math.PI + 1.2);
+        ctx.arc(P.x - cx + P.face * 12, P.y - cy - 16, 24, P.face > 0 ? -1.2 : Math.PI - 0.6, P.face > 0 ? 0.6 : Math.PI + 1.2);
         ctx.stroke();
       }
 
@@ -1135,7 +1136,8 @@ export function WorldMap({ playerLevel, won, teamEmpty, gold, onBack, onEnter }:
         <button className="mk-title" data-testid="activity-action" onClick={interactActivity} style={{...hudBtn,width:"100%",minHeight:44,color:"#ffd23a",fontSize:8}}>{activity.name} [E]</button>
       </div>}
       <ExplorationControls onMove={(x,y)=>{analog.current={x,y};}} onJump={doJump} onJumpEnd={()=>input.current.jumpHeld=false}
-        onAttack={()=>attackReq.current=true} onSpecial={()=>specialReq.current=true} cooldown={hud.special} disabled={mapOpen||journalOpen||accessOpen||busy} />
+        onAttack={()=>attackReq.current=true} onSpecial={()=>specialReq.current=true} cooldown={hud.special} disabled={mapOpen||journalOpen||accessOpen||busy}
+        onInteract={enter} interactReady={!!near||!!activity} />
       {accessOpen && <TournamentAccess playerLevel={playerLevel} won={won} teamEmpty={teamEmpty} onClose={()=>setAccessOpen(false)}
         onEnter={(s)=>enterTournament(s.t)} onTravel={(s)=>{warpTo(s.tx*T,s.ty*T);setAccessOpen(false);}} />}
       {journalOpen && <WorldJournal region={region} save={save.current} onClose={()=>setJournalOpen(false)} onPersist={persist} />}

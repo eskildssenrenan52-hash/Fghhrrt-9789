@@ -1,10 +1,15 @@
+import { freshStory, normalizeStory, type StoryProgress } from "./story-state";
 import { useSyncExternalStore } from "react";
+import { freshCityLife, normalizeCityLife, type CityLife } from './city-life';
+import { freshDrones, normalizeDrones, droneLevel, droneStats, type DroneState } from "./drone-system";
 import { freshTutorial, normalizeTutorial, type TutorialProgress } from "./progression";
 import { initialExpansion, normalizeExpansion, cityBonus, type ExpansionState } from "./expansion";
 import { GENERAL } from "./config";
 import { playerMaxXP, statHooks, type RobotSave } from "./engine";
 import { initialMeta, normalizeMeta, masteryBonus, equipStats, TOURNAMENT_DIAMONDS, type MetaState } from "./meta";
 import { ROBOT_MAP, ROBOTS } from "./robots";
+import { isPantheonRobot } from "./pantheon-roster";
+import { TRIAL_STAGES, canSummon, initialPantheon, normalizePantheon, trialOf, type PantheonState } from "./pantheon";
 import {
   applyMatch,
   claimMission,
@@ -92,6 +97,10 @@ import {
 } from "./cards";
 
 export interface GameState extends MetaState {
+  cityLife: CityLife;
+  /** Modo História: capítulos vencidos e escolhas. */
+  story: StoryProgress;
+  drones: DroneState;
   tutorial: TutorialProgress;
   expansion: ExpansionState;
   version: number;
@@ -129,6 +138,8 @@ export interface GameState extends MetaState {
   mining: MiningState;
   /** robôs montados no laboratório (Fase F). */
   customs: CustomRobot[];
+  /** Panteão: provações vencidas por chassi exclusivo. */
+  pantheon: PantheonState;
   /** progresso dos modos de jogo. */
   modes: {
     babelFloor: number;
@@ -150,6 +161,10 @@ const VERSION = 3;
 function initialState(): GameState {
   return {
     version: VERSION,
+    cityLife: freshCityLife(),
+    story: freshStory(),
+    drones: freshDrones(),
+    pantheon: initialPantheon(),
     tutorial: freshTutorial(),
     expansion: initialExpansion(),
     gold: 0,
@@ -263,6 +278,9 @@ function read(): GameState {
       ...base,
       ...parsed,
       version: VERSION,
+      cityLife: normalizeCityLife(parsed.cityLife),
+      story: normalizeStory(parsed.story),
+      drones: normalizeDrones(parsed.drones),
       tutorial: normalizeTutorial(parsed.tutorial, parsed.robots.length),
       loadouts: parsed.loadouts ?? {},
       gadgets: parsed.gadgets ?? {},
@@ -286,6 +304,7 @@ function read(): GameState {
       mining: normalizeMining(parsed.mining),
       customs,
       modes: { ...base.modes, ...(parsed.modes ?? {}) },
+      pantheon: normalizePantheon((parsed as { pantheon?: unknown }).pantheon),
       ...normalizeMeta(parsed),
       expansion: normalizeExpansion(parsed.expansion),
     };
@@ -352,6 +371,8 @@ export function addPlayerXP(amount: number) {
 }
 
 export function unlockRobot(id: string): boolean {
+  // chassis do Panteão só são recrutados lá (summonPantheon) — nunca por loja/contrato/cápsula.
+  if (isPantheonRobot(id)) return false;
   if (!ROBOT_MAP[id] || state.robots.some((r) => r.id === id)) return false;
   const avgLevel = Math.max(
     1,
@@ -364,9 +385,40 @@ export function unlockRobot(id: string): boolean {
   return true;
 }
 
+/** Registra uma provação vencida do Panteão (só avança em sequência). */
+export function recordTrialWin(id: string, stage: number, flawless: boolean): boolean {
+  if (!trialOf(id)) return false;
+  const cur = state.pantheon.wins[id] ?? 0;
+  if (stage !== cur || cur >= TRIAL_STAGES) return false;
+  setState((s) => ({
+    ...s,
+    pantheon: {
+      wins: { ...s.pantheon.wins, [id]: cur + 1 },
+      flawless:
+        flawless && stage === TRIAL_STAGES - 1 && !s.pantheon.flawless.includes(id)
+          ? [...s.pantheon.flawless, id]
+          : s.pantheon.flawless,
+    },
+  }));
+  return true;
+}
+
+/** Desperta um chassi do Panteão: exige provações + missões e cobra a oferenda em diamantes. */
+export function summonPantheon(id: string): boolean {
+  const t = trialOf(id);
+  if (!t || !canSummon(state, id)) return false;
+  const level = Math.max(1, ...state.robots.map((r) => r.level));
+  setState((s) => ({
+    ...s,
+    diamonds: s.diamonds - t.cost,
+    robots: [...s.robots, { id, level, xp: 0, trained: { str: 0, def: 0, agl: 0 } }],
+  }));
+  return true;
+}
+
 export function lockedRobotIds(): string[] {
   const owned = new Set(state.robots.map((r) => r.id));
-  return ROBOTS.filter((r) => !owned.has(r.id) && !isCustom(r.id)).map((r) => r.id);
+  return ROBOTS.filter((r) => !owned.has(r.id) && !isCustom(r.id) && !isPantheonRobot(r.id)).map((r) => r.id);
 }
 
 export function addItem(id: string, qty: number) {
@@ -425,6 +477,7 @@ statHooks.bonus = (robotId: string) => {
     out.def += b.def ?? 0;
     out.agl += b.agl ?? 0;
   };
+  add(droneStats(robotId,droneLevel(g,robotId)));
   const m = g.mastery[robotId];
   if (g.robots.some((r) => r.id === robotId)) add(cityBonus(g, robotId));
   if (m) add(masteryBonus(m.pts));
@@ -833,7 +886,7 @@ export function miningTick(now = Date.now()): { gained: number; ms: number } {
   setState((s) => {
     const ores = { ...s.mining.ores };
     for (const [id, q] of Object.entries(res.ores)) ores[id] = (ores[id] ?? 0) + q;
-    return withMining(s, { ores, lastTick: now, totalMined: s.mining.totalMined + res.gained });
+    return withMining(s, { ores, carry:res.carry, lastTick: now, totalMined: s.mining.totalMined + res.gained });
   });
   return { gained: res.gained, ms: res.ms };
 }
@@ -882,7 +935,7 @@ export function upgradeRefinery(): boolean {
 
 export function upgradeDrill(depth: number): boolean {
   const m = state.mining;
-  if (!Number.isInteger(depth) || depth < 1 || depth > MAX_DEPTH || depth > m.depth) return false;
+  if (!Number.isInteger(depth) || depth < 1 || depth > MAX_DEPTH || depth > m.highestDepth) return false;
   const lvl = m.drills[String(depth)] ?? 0;
   if (lvl >= DRILL_MAX) return false;
   const cost = drillCost(depth, lvl);
@@ -900,9 +953,10 @@ export function upgradeDrill(depth: number): boolean {
 export function descendMine(): boolean {
   const m = state.mining;
   if (m.depth >= MAX_DEPTH) return false;
+  if(m.depth<m.highestDepth){setState(s=>withMining(s,{depth:s.mining.depth+1}));return true;}
   const next = DEPTHS[m.depth];
   if (state.gold < next.cost) return false;
-  setState((s) => withMining({ ...s, gold: s.gold - next.cost }, { depth: s.mining.depth + 1 }));
+  setState((s) => withMining({ ...s, gold: s.gold - next.cost }, { depth: s.mining.depth + 1,highestDepth:s.mining.depth+1 }));
   return true;
 }
 
@@ -931,7 +985,8 @@ export function collectRefine(now = Date.now()): number {
   setState((s) =>
     withMining(s, {
       bars: { ...s.mining.bars, [job.ore]: (s.mining.bars[job.ore] ?? 0) + job.bars },
-      job: null,
+      job: s.mining.queue[0]??null,
+      queue:s.mining.queue.slice(1),
     }),
   );
   return job.bars;

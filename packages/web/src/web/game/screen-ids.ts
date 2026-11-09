@@ -9,6 +9,7 @@ export type Screen =
   | "engineer"
   | "pets"
   | "cards"
+  | "drones"
   | "mine"
   | "lab"
   | "profile"
@@ -20,4 +21,6 @@ export type Screen =
   | "power"
   | "museum"
   | "portal"
-  | "online";
+  | "pantheon"
+  | "online"
+  | "story";

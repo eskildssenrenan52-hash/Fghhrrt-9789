@@ -13,4 +13,5 @@
 .mc-system-menu p{font-size:10px;color:#91aebd;margin-bottom:0}
 .mc-system-primary button:hover{filter:brightness(1.35)}
 @keyframes mc-system-glow{50%{filter:brightness(1.2) drop-shadow(0 0 6px #35e2f066)}}
-@media(prefers-reduced-motion:reduce){.mc-system-primary img{animation:none}}
+@media(prefers-reduced-motion:reduce){.mc-system-primary img{animation:none}}.mc-system-primary .mc-system-story span{color:#ffd27a}
+.mc-system-primary .mc-system-story img{filter:drop-shadow(0 0 5px #ffb21a88)}

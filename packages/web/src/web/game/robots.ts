@@ -1,6 +1,5 @@
 import { buildKit, VFX, type Skill, type SkillEffect } from "./skills";
 import { NPC_DEFS } from "./enemies";
-import { MYTHIC_ROBOTS } from "./mythic-roster";
 
 export type {
   EffectType,
@@ -21,8 +20,7 @@ export interface Ratios {
   xv: number; // multiplicador de xp
 }
 
-/** "mythic" (MÍTICO) fica acima de ouro e só existe no Panteão Mítico. */
-export type Rarity = "bronze" | "silver" | "gold" | "mythic";
+export type Rarity = "bronze" | "silver" | "gold";
 
 export interface RobotDef {
   id: string;
@@ -3156,10 +3154,9 @@ export const ROBOTS: RobotDef[] = BLUEPRINTS.map((b) => ({
 export const CATALOG_IDS: readonly string[] = Object.freeze(BLUEPRINTS.map((b) => b.id));
 
 export const ROBOT_MAP: Record<string, RobotDef> = Object.fromEntries(
-  [...ROBOTS, ...NPC_DEFS, ...MYTHIC_ROBOTS].map((r) => [r.id, r]),
+  [...ROBOTS, ...NPC_DEFS].map((r) => [r.id, r]),
 );
 
-export { MYTHIC_ROBOTS, MYTHIC_IDS, isMythic } from "./mythic-roster";
 
 export const STARTER_ROBOTS = ["aurorion", "ferrovax", "cryolance", "voltronin"];
 
@@ -3197,6 +3194,13 @@ export function spriteUrl(id: string): string {
 export function faceUrl(id: string): string {
   if (id.startsWith("npc_")) return `/enemies/${id.slice(4)}_face.png`;
   return faceResolver?.(id) ?? `/robots/${id}_face.png`;
+}
+
+/** Retrato estilo "brawler" (160px). Robôs de laboratório caem no rosto do sprite. */
+export function portraitUrl(id: string): string {
+  if (id.startsWith("npc_")) return `/portraits/${id.slice(4)}_face.png`;
+  if (!ROBOT_MAP[id] || id.startsWith("lab_")) return faceUrl(id);
+  return `/portraits/${id}_face.png`;
 }
 
 /** Adiciona (ou substitui) um robo no roster em runtime. */

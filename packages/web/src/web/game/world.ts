@@ -136,7 +136,7 @@ export function hash2(x: number, y: number, s = 0): number {
   return hash(Math.imul(x, 374761393) ^ Math.imul(y, 668265263) ^ Math.imul(s + 1, 1442695041));
 }
 const smooth = (t: number) => t * t * (3 - 2 * t);
-function noise1(x: number, s: number): number {
+export function noise1(x: number, s: number): number {
   const i = Math.floor(x);
   const f = smooth(x - i);
   const a = hash2(i, 0, s);
@@ -156,7 +156,7 @@ function noise2(x: number, y: number, s: number): number {
 }
 
 /** gerador pseudo-aleatorio deterministico. */
-function rng(seed: number) {
+export function rng(seed: number) {
   let s = seed >>> 0;
   return () => {
     s = (s + 0x6d2b79f5) >>> 0;

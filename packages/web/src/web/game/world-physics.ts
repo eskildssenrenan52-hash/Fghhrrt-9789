@@ -16,8 +16,9 @@ export const ACCEL = 2400;
 export const FRICTION = 2800;
 export const COYOTE = 0.1;
 export const BUFFER = 0.13;
-export const HALF_W = 14;
-export const BODY_H = 56;
+/** Jogador do Coliseu ocupa exatamente 1 bloco (tile T=32). */
+export const HALF_W = 15;
+export const BODY_H = 32;
 export const LIFT_V = 580;
 
 export interface Body {
